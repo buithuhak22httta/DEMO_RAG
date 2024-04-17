@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "demo-rag"
+version = "0.1.0"
+description = "Bui Thu Ha <thuhak22ba@gmail.com>"
+authors = ["buithuhak22httta <realchanexok@gmail.com>"]
+readme = "README.md"
+packages = [{include = "demo_rag"}]
+
+[tool.poetry.dependencies]
+python = "~3.9"
+openai = "^1.14.3"
+gradio = "^4.24.0"
+python-dotenv = "^1.0.1"
+requests = "^2.31.0"
+langchain = "^0.1.14"
+singlestoredb = "^1.0.4"
+tiktoken = "^0.6.0"
+tqdm = "^4.66.2"
+llama-index = "^0.10.29"
+huggingface-hub = "^0.22.2"
+transformers = "^4.39.3"
+pypdf = "^4.2.0"
+langchain-community = "^0.0.33"
+sentence-transformers = "^2.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
