@@ -10,6 +10,8 @@ from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_community.document_loaders.directory import DirectoryLoader
 from src.prompts import qa_template
 from langchain_community.chat_models.openai import ChatOpenAI
+from langchain.memory import ConversationBufferWindowMemory
+from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
 
 def set_qa_prompt():
     """
@@ -33,12 +35,25 @@ CHUNK_SIZE = config.get('CHUNK_SIZE')
 CHUNK_OVERLAP = config.get('CHUNK_OVERLAP')
 
 def build_retrieval_qa(llm, prompt, vectordb):
-    dbqa = RetrievalQA.from_chain_type(llm=llm,
-                                       chain_type='stuff',
-                                       retriever=vectordb.as_retriever(search_kwargs={'k': VECTOR_COUNT}),
-                                       return_source_documents=RETURN_SOURCE_DOCUMENTS,
-                                       chain_type_kwargs={'prompt': prompt}
-                                       )
+    # dbqa = RetrievalQA.from_chain_type(llm=llm,
+    #                                    chain_type='stuff',
+    #                                    retriever=vectordb.as_retriever(search_kwargs={'k': VECTOR_COUNT}),
+    #                                    return_source_documents=RETURN_SOURCE_DOCUMENTS,
+    #                                    chain_type_kwargs={'prompt': prompt}
+    #                                    )
+    memory = ConversationBufferWindowMemory(
+        memory_key='chat_history', 
+        return_messages=True,
+        output_key='answer',
+        k=5
+        )
+    dbqa = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vectordb.as_retriever(search_kwargs={'k': VECTOR_COUNT}),
+        memory=memory,
+        return_source_documents=RETURN_SOURCE_DOCUMENTS,
+        condense_question_prompt=prompt
+    )
     return dbqa
 
 
@@ -56,6 +71,7 @@ def setup_dbqa():
     vectorstore = SingleStoreDB(embeddings, distance_strategy="DOT_PRODUCT", table_name="demo0")
     llm = ChatOpenAI(model="gpt-3.5-turbo", api_key = OPENAI_API_KEY, base_url=BASE_URL)
     qa_prompt = set_qa_prompt()
+    print(qa_prompt)
     dbqa = build_retrieval_qa(llm, qa_prompt, vectorstore)
 
     return dbqa

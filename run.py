@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import gradio as gr
 
-from gradio_ui import demo
+from src.gradio_ui import demo
 
 app = FastAPI()
 

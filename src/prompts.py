@@ -7,7 +7,9 @@
 # as it is highly sensitive to whitespace changes. For example, it could have problems generating
 # a summary from the pieces of context if the spacing is not done correctly
 
-qa_template = """Use the following pieces of information to answer the user's question.
+qa_template = """You are a helpful assistant, answering questions related to BIDV bank for this bank's employees. 
+Use the following pieces of information to answer the user's question.
+Remember only using Vietnamese to answer user's question.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
 Context: {context}

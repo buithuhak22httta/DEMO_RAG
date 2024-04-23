@@ -12,7 +12,7 @@ from langchain_community.document_loaders.directory import DirectoryLoader
 import tiktoken
 import yaml
 import os
-from retrieval import setup_dbqa
+from src.retrieval import setup_dbqa
 
 load_dotenv(find_dotenv())
 
@@ -61,12 +61,41 @@ def process_document():
         return f"Error processing documents: {e}"
     return "Chunk and embed successfully!"
 
+# def update_prompts_file(messages_to_send):
+#     prompts_file_path = os.path.join('src', 'prompts.py')
+#     with open(prompts_file_path, 'r') as f:
+#         file_content = f.read()
 
-def chat_completion(messages: list[dict]) -> str:
+#     updated_content = file_content.replace("Context: {context}", f"Conversation: {messages_to_send}\nContext: {{context}}")
+
+#     print(updated_content)
+#     with open(prompts_file_path, 'w', encoding='utf-8') as f:
+#         f.write(updated_content)
+
+# def format_messages_to_string(messages_to_send) -> str:
+#     formatted_string = ''
+#     for message in messages_to_send:
+#         role = message['role']
+#         content = message['content']
+#         if content is not None:
+#             formatted_string += f"{role}: '{content}', "
+#     formatted_string = formatted_string.rstrip(', ')
+#     return formatted_string
+
+def chat_completion(messages: list[dict]) -> list:
     try:
+        # messages_to_send = messages[-6:] if len(messages) >= 6 else messages
+        # formated_messages = format_messages_to_string(messages_to_send)
+        # update_prompts_file(formated_messages)
         dbqa = setup_dbqa()
-        response = dbqa({'query': messages})
-        return response["result"]
+        # response = dbqa({'query': messages[-1]['content']})
+        response = dbqa({'question': messages[-1]['content']})
+        # return response["result"]
+        result = response["answer"] + '\n**Tài liệu tham khảo:**\n' + str(response["source_documents"]) 
+        # print(response["source_documents"])
+        # return response["answer"]
+        return result
+        
     except Exception as e:
         return f'We are facing an issue: {e}'
 
@@ -99,10 +128,12 @@ def format_messages(chat_history: list[list]) -> list[dict]:
 def generate_response(text: str, chatbot: list[list]) -> tuple:
     chatbot.append([text, None])
     formated_messages = format_messages(chatbot)
-    print(formated_messages)
+    # print(formated_messages)
+    # print('------------')
     response = chat_completion(formated_messages)
-    print(response)
+    # print(response)
+    # print('------------')
     chatbot[-1][1] = response
-    print(text)
+    # print(text)
     print(chatbot)
     return '', chatbot
